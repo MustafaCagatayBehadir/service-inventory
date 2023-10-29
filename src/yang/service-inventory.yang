@@ -56,15 +56,11 @@ module service-inventory {
         type uint32;
     }
 
-    typedef vlan-id-type {
-        type uint16 {
-            range "1..4094";
+    typedef pw-encapsulation-type {
+        type enumeration {
+            enum ethernet;
+            enum vlan;
         }
-        description
-          "The VLAN-ID that uniquely identifies a VLAN.  This is the 12-bit
-           VLAN-ID Used In The VLAN Tag header.";
-        reference
-          "[802.1Q]";
     }
 
     grouping l2vpn-grouping {
@@ -119,6 +115,11 @@ module service-inventory {
                 leaf pw-class {
                     tailf:info "PW Class Template Name To Use For This Pseudowire";
                     type string;
+                }
+
+                leaf encapsulation {
+                    tailf:info "Specify Peer's Encapsulation Type";
+                    type pw-encapsulation-type;
                 }
             }
         }

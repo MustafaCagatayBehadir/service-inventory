@@ -5,14 +5,14 @@
       <name>l2vpn</name>
       <?set-root-node {/devices}?>
       <?foreach {/device}?>
-        <?set DEVICE={name}?>
+        <?set DEVICE_NAME={name}?>
           <?if {platform/name='ios-xr'}?>
             <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
               <l2vpn>
                 <name>{bridge-domain-name}</name>
                 <mtu>{mtu}</mtu>
                 <endpoint>
-                  <device>{$DEVICE}</device>
+                  <device>{$DEVICE_NAME}</device>
                   <?foreach {interface}?>
                     <pe-interface>
                       <name>{name}</name>
@@ -28,6 +28,33 @@
                 </endpoint>
               </l2vpn>
             <?end?><!--foreach {config/l2vpn/bridge/group/bridge-domain}-->
+          <?elif {platform/name='huawei-vrp'}?><!--if {platform/name='ios-xr'}-->
+            <?foreach {config/vsi}?>
+              <?set PW_ID={pwsignal/ldp/vsi-id}?>
+              <?set VSI_NAME={name}?>
+              <l2vpn>
+                <name>{name}</name>
+                <mtu>{mtu}</mtu>
+                <endpoint>
+                  <device>{$DEVICE_NAME}</device>
+                  <?foreach {pwsignal/ldp/peer}?>
+                    <neighbor>
+                      <address>{address}</address>
+                      <pw-id>{$PW_ID}</pw-id>
+                      <encapsulation>{encapsulation}</encapsulation>
+                    </neighbor>
+                  <?end?><!--foreach {vfi/neighbor}-->
+                  <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet}?>
+                    <?if {l2/binding/vsi=$VSI_NAME}?>
+                      <?set IF_NAME={concat('Ethernet', name)}?>
+                      <pe-interface>
+                        <name>{$IF_NAME}</name>
+                      </pe-interface>
+                    <?end?><!--if {l2/binding/vsi}-->
+                  <?end?><!--foreach {config/interface/Ethernet}-->
+                </endpoint>
+              </l2vpn>            
+            <?end?><!--foreach {config/vsi}-->
           <?end?><!--if {platform/name='ios-xr'}-->
       <?end?><!--foreach {/device}-->
     </service>
