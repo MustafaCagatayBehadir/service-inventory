@@ -39,15 +39,6 @@ module service-inventory {
         }
     }
 
-    typedef bw-type {
-        type uint64 {
-            range 1..max;
-        }
-        units "Mbps";
-        description
-          "Bandwidth in MegaBits Per Second.";
-    }
-
     typedef mtu-type {
         type uint16;
     }
