@@ -153,6 +153,11 @@ module service-inventory {
                 tailf:info "L2VPN Service Inventory";
                 key name;
 
+                config false;
+                tailf:cdb-oper {
+                    tailf:persistent true;
+                }
+
                 uses srvc-inv:l2vpn-grouping;
             }
         }
