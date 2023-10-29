@@ -1,0 +1,35 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <service-inventory-manager xmlns="https://www.turktelekom.com.tr/service-inventory">
+    <name>{name}</name>
+    <service>
+      <name>l2vpn</name>
+      <?set-root-node {/devices}?>
+      <?foreach {/device}?>
+        <?set DEVICE={name}?>
+          <?if {platform/name='ios-xr'}?>
+            <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
+              <l2vpn>
+                <name>{bridge-domain-name}</name>
+                <mtu>{mtu}</mtu>
+                <endpoint>
+                  <device>{$DEVICE}</device>
+                  <?foreach {interface}?>
+                    <pe-interface>
+                      <name>{name}</name>
+                    </pe-interface>
+                  <?end?><!--foreach {interface}-->
+                  <?foreach {vfi/neighbor}?>
+                    <neighbor>
+                      <address>{address}</address>
+                      <pw-id>{pw-id}</pw-id>
+                      <pw-class>{pw-class}</pw-class>
+                    </neighbor>
+                  <?end?><!--foreach {vfi/neighbor}-->
+                </endpoint>
+              </l2vpn>
+            <?end?><!--foreach {config/l2vpn/bridge/group/bridge-domain}-->
+          <?end?><!--if {platform/name='ios-xr'}-->
+      <?end?><!--foreach {/device}-->
+    </service>
+  </service-inventory-manager>
+</config-template>

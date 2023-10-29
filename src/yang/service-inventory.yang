@@ -1,0 +1,177 @@
+module service-inventory {
+
+    yang-version 1.1;
+    namespace "https://www.turktelekom.com.tr/service-inventory";
+    prefix srvc-inv;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+    import tailf-ncs {
+        prefix ncs;
+    }
+
+    description
+      "Service inventory for multi-vendor service inventory management.";
+
+    revision 2023-10-28 {
+        description
+          "Initial revision.";
+    }
+
+    typedef srvc-inv-string {
+        type string {
+            pattern
+              '[^\s]+' {
+                error-message
+                  "No space/s allowed.";
+            }
+        }
+    }
+
+    typedef service-id-type {
+        type enumeration {
+            enum l2vpn;
+            enum l3vpn;
+        }
+    }
+
+    typedef bw-type {
+        type uint64 {
+            range 1..max;
+        }
+        units "Mbps";
+        description
+          "Bandwidth in MegaBits Per Second.";
+    }
+
+    typedef mtu-type {
+        type uint16;
+    }
+
+    typedef pw-id-type {
+        type uint32;
+    }
+
+    typedef vlan-id-type {
+        type uint16 {
+            range "1..4094";
+        }
+        description
+          "The VLAN-ID that uniquely identifies a VLAN.  This is the 12-bit
+           VLAN-ID Used In The VLAN Tag header.";
+        reference
+          "[802.1Q]";
+    }
+
+    grouping l2vpn-grouping {
+        leaf name {
+            tailf:info "L2VPN Service Name";
+            type srvc-inv-string;
+        }
+
+        leaf mtu {
+            tailf:info "Interface/service MTU";
+            type mtu-type;
+        }
+
+        list endpoint {
+            tailf:info "L2VPN Endpoint";
+
+            key "device";
+
+            leaf device {
+                tailf:info "PE Device";
+                type leafref {
+                    path "/ncs:devices/ncs:device/ncs:name";
+                }
+            }
+
+            list pe-interface {
+                tailf:info "PE Device Interface";
+
+                key "name";
+
+                leaf name {
+                    tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
+                    type string;
+                }
+            }
+
+            list neighbor {
+                tailf:info "Specify The Peer To Cross Connect";
+
+                key address;
+
+                leaf address {
+                    tailf:info "IP Address Of The Peer";
+                    type inet:ip-address;
+                }
+
+                leaf pw-id {
+                    tailf:info "Pseudowire Id";
+                    type pw-id-type;
+                }
+
+                leaf pw-class {
+                    tailf:info "PW Class Template Name To Use For This Pseudowire";
+                    type string;
+                }
+            }
+        }
+    }
+
+    list service-inventory-manager {
+        description
+          "Multi-vendor service inventory management.";
+
+        key name;
+        leaf name {
+            tailf:info "Service Inventory Group Name";
+            type srvc-inv-string;
+        }
+
+        uses ncs:service-data;
+        ncs:servicepoint service-inventory-servicepoint;
+
+        list service {
+            tailf:info "Inventory Service Type";
+
+            key name;
+
+            leaf name {
+                tailf:info "Service Type";
+                type service-id-type;
+            }
+
+            list l2vpn {
+                when "../name = 'l2vpn'";
+                tailf:info "L2VPN Service Inventory";
+                key name;
+
+                uses srvc-inv:l2vpn-grouping;
+            }
+        }
+
+        // /////////////////////////////////////////////////////////
+        // Service oob-discovery action
+        // /////////////////////////////////////////////////////////
+        tailf:action oob-discovery {
+            tailf:actionpoint oob-discovery-point;
+            input {
+                leaf service {
+                    tailf:info "Service Id l2vpn | l3vpn";
+                    type service-id-type;
+                }
+            }
+            output {
+                leaf status {
+                    type string;
+                }
+            }
+        }
+    }
+}
