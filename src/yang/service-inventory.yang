@@ -54,6 +54,12 @@ module service-inventory {
         }
     }
 
+    typedef customer-id-type {
+        type uint32 {
+            range 1..2147483647;
+        }
+    }
+
     grouping l2vpn-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
@@ -63,6 +69,11 @@ module service-inventory {
         leaf mtu {
             tailf:info "Interface/service MTU";
             type mtu-type;
+        }
+
+        leaf customer-id {
+            tailf:info "Provision a Customer";
+            type customer-id-type;
         }
 
         list endpoint {
@@ -143,11 +154,6 @@ module service-inventory {
                 when "../name = 'l2vpn'";
                 tailf:info "L2VPN Service Inventory";
                 key name;
-
-                config false;
-                tailf:cdb-oper {
-                    tailf:persistent true;
-                }
 
                 uses srvc-inv:l2vpn-grouping;
             }

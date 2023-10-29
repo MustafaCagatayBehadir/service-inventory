@@ -55,6 +55,28 @@
                 </endpoint>
               </l2vpn>            
             <?end?><!--foreach {config/vsi}-->
+          <?else?>
+            <?foreach {config/service/vpls}?>
+              <l2vpn>
+                <name>{service-id}</name>
+                <mtu>{service-mtu}</mtu>
+                <endpoint>
+                  <device>{$DEVICE_NAME}</device>
+                  <?foreach {interface}?>
+                    <pe-interface>
+                      <name>{name}</name>
+                    </pe-interface>
+                  <?end?><!--foreach {interface}-->
+                  <?foreach {vfi/neighbor}?>
+                    <neighbor>
+                      <address>{address}</address>
+                      <pw-id>{pw-id}</pw-id>
+                      <pw-class>{pw-class}</pw-class>
+                    </neighbor>
+                  <?end?><!--foreach {vfi/neighbor}-->
+                </endpoint>
+              </l2vpn>              
+            <?end?><!--foreach {config/service/vpls}-->
           <?end?><!--if {platform/name='ios-xr'}-->
       <?end?><!--foreach {/device}-->
     </service>
