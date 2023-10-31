@@ -60,6 +60,12 @@ module service-inventory {
         }
     }
 
+    typedef sdp-id-type {
+        type uint16 {
+            range 1..32767;
+        }
+    }
+
     grouping l2vpn-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
@@ -122,6 +128,11 @@ module service-inventory {
                 leaf encapsulation {
                     tailf:info "Specify Peer's Encapsulation Type";
                     type pw-encapsulation-type;
+                }
+
+                leaf sdp-id {
+                    tailf:info "SDP Id";
+                    type sdp-id-type;
                 }
             }
         }

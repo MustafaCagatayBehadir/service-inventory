@@ -44,13 +44,11 @@
                       <encapsulation>{encapsulation}</encapsulation>
                     </neighbor>
                   <?end?><!--foreach {vfi/neighbor}-->
-                  <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet}?>
-                    <?if {l2/binding/vsi=$VSI_NAME}?>
-                      <?set IF_NAME={concat('Ethernet', name)}?>
-                      <pe-interface>
-                        <name>{$IF_NAME}</name>
-                      </pe-interface>
-                    <?end?><!--if {l2/binding/vsi}-->
+                  <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}?>
+                    <?set IF_NAME={concat('Ethernet', name)}?>
+                    <pe-interface>
+                      <name>{$IF_NAME}</name>
+                    </pe-interface>
                   <?end?><!--foreach {config/interface/Ethernet}-->
                 </endpoint>
               </l2vpn>            
@@ -62,18 +60,27 @@
                 <mtu>{service-mtu}</mtu>
                 <endpoint>
                   <device>{$DEVICE_NAME}</device>
-                  <?foreach {interface}?>
+                  <?foreach {sap}?>
                     <pe-interface>
-                      <name>{name}</name>
+                      <name>{sap-id}</name>
                     </pe-interface>
                   <?end?><!--foreach {interface}-->
-                  <?foreach {vfi/neighbor}?>
+                  <?foreach {spoke-sdp}?>
+                    <?set SDP_ID={sdp-id}?>
                     <neighbor>
-                      <address>{address}</address>
-                      <pw-id>{pw-id}</pw-id>
-                      <pw-class>{pw-class}</pw-class>
+                      <address>{string(/device[name=$DEVICE_NAME]/config/service/sdp[sdp-id=$SDP_ID]/far-end)}</address>
+                      <pw-id>{vc-id}</pw-id>
+                      <sdp-id>{$SDP_ID}</sdp-id>
                     </neighbor>
-                  <?end?><!--foreach {vfi/neighbor}-->
+                  <?end?><!--foreach {spoke-sdp}-->
+                  <?foreach {mesh-sdp}?>
+                    <?set SDP_ID={sdp-id}?>
+                    <neighbor>
+                      <address>{string(/device[name=$DEVICE_NAME]/config/service/sdp[sdp-id=$SDP_ID]/far-end)}</address>
+                      <pw-id>{vc-id}</pw-id>
+                      <sdp-id>{$SDP_ID}</sdp-id>
+                    </neighbor>
+                  <?end?><!--foreach {mesh-sdp}-->
                 </endpoint>
               </l2vpn>              
             <?end?><!--foreach {config/service/vpls}-->
