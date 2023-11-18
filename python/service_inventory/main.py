@@ -11,7 +11,7 @@ USER = "admin"
 def get_kp_service_id(keypath: ncs.maagic.keypath._KeyPath) -> str:
     """Get service name from keypath."""
     kpath = str(keypath)
-    service = kpath[kpath.rfind('{') + 1:len(kpath) - 1]
+    service = kpath[kpath.rfind("{") + 1 : len(kpath) - 1]
     return service
 
 
@@ -31,7 +31,7 @@ class OobDiscovery(ncs.dp.Action):
         output.status = "success"
 
         # Check environment setting for IPC port value
-        port = int(os.getenv('NCS_IPC_PORT', ncs.NCS_PORT))
+        port = int(os.getenv("NCS_IPC_PORT", ncs.NCS_PORT))
         self.log.info("Using NCS IPC port value ##" + INDENTATION + str(port))
 
         with ncs.maapi.single_write_trans(USER, "system") as trans:
@@ -69,13 +69,13 @@ class Main(ncs.application.Application):
 
     def setup(self):
         """Register service and actions."""
-        self.log.info('Main RUNNING')
+        self.log.info("Main RUNNING")
 
         # servce-inventory service registration
-        self.register_service('service-inventory-servicepoint', ServiceInventoryCallbacks)
+        self.register_service("service-inventory-servicepoint", ServiceInventoryCallbacks)
 
-        self.register_action('oob-discovery-point', OobDiscovery)
+        self.register_action("oob-discovery-point", OobDiscovery)
 
     def teardown(self):
         """Teardown."""
-        self.log.info('Main FINISHED')
+        self.log.info("Main FINISHED")
