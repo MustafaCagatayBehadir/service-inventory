@@ -1,0 +1,90 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <!-- XR L2VPN MACRO -->
+  <?macro xr-l2vpn-macro?>
+    <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
+      <l2vpn>
+        <name>{bridge-domain-name}</name>
+        <mtu>{mtu}</mtu>
+        <endpoint>
+          <device>{$DEVICE_NAME}</device>
+          <?foreach {interface}?>
+            <?expand xr-interface-macro?>
+          <?end?><!--foreach {interface}-->
+          <?foreach {vfi/neighbor}?>
+            <neighbor>
+              <address>{address}</address>
+              <pw-id>{pw-id}</pw-id>
+              <pw-class>{pw-class}</pw-class>
+            </neighbor>
+          <?end?><!--foreach {vfi/neighbor}-->
+        </endpoint>
+      </l2vpn>
+    <?end?><!--foreach {config/l2vpn/bridge/group/bridge-domain}-->
+  <?endmacro?>
+  <!-- XR L2VPN MACRO -->
+
+  <!-- VRP L2VPN MACRO -->
+  <?macro vrp-l2vpn-macro?>
+    <?foreach {config/vsi}?>
+      <?set PW_ID={pwsignal/ldp/vsi-id}?>
+      <?set VSI_NAME={name}?>
+      <l2vpn>
+        <name>{name}</name>
+        <mtu>{mtu}</mtu>
+        <endpoint>
+          <device>{$DEVICE_NAME}</device>
+          <?foreach {pwsignal/ldp/peer}?>
+            <neighbor>
+              <address>{address}</address>
+              <pw-id>{$PW_ID}</pw-id>
+              <encapsulation>{encapsulation}</encapsulation>
+            </neighbor>
+          <?end?><!--foreach {vfi/neighbor}-->
+          <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}?>
+            <?set IF_NAME={concat('Ethernet', name)}?>
+            <pe-interface>
+              <name>{$IF_NAME}</name>
+            </pe-interface>
+          <?end?><!--foreach {config/interface/Ethernet}-->
+        </endpoint>
+      </l2vpn>
+    <?end?><!--foreach {config/vsi}-->
+  <?endmacro?>
+  <!-- VRP L2VPN MACRO -->
+
+  <!-- SR L2VPN MACRO -->
+  <?macro sr-l2vpn-macro?>
+    <?foreach {config/service/vpls}?>
+      <l2vpn>
+        <name>{service-id}</name>
+        <mtu>{service-mtu}</mtu>
+        <endpoint>
+          <device>{$DEVICE_NAME}</device>
+          <?foreach {sap}?>
+            <pe-interface>
+              <name>{sap-id}</name>
+            </pe-interface>
+          <?end?><!--foreach {sap}-->
+          <?foreach {spoke-sdp}?>
+            <?set SDP_ID={sdp-id}?>
+            <neighbor>
+              <address>{string(/device[name=$DEVICE_NAME]/config/service/sdp[sdp-id=$SDP_ID]/far-end)}</address>
+              <pw-id>{vc-id}</pw-id>
+              <sdp-id>{$SDP_ID}</sdp-id>
+            </neighbor>
+          <?end?><!--foreach {spoke-sdp}-->
+          <?foreach {mesh-sdp}?>
+            <?set SDP_ID={sdp-id}?>
+            <neighbor>
+              <address>{string(/device[name=$DEVICE_NAME]/config/service/sdp[sdp-id=$SDP_ID]/far-end)}</address>
+              <pw-id>{vc-id}</pw-id>
+              <sdp-id>{$SDP_ID}</sdp-id>
+            </neighbor>
+          <?end?><!--foreach {mesh-sdp}-->
+        </endpoint>
+      </l2vpn>              
+    <?end?><!--foreach {config/service/vpls}-->    
+  <?endmacro?>
+  <!-- SR L2VPN MACRO -->  
+
+</config-template>

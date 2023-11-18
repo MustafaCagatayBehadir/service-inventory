@@ -37,8 +37,6 @@ class OobDiscovery(ncs.dp.Action):
         with ncs.maapi.single_write_trans(USER, "system") as trans:
             root = ncs.maagic.get_root(trans, shared=False)
             service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
-            del root.srvc_inv__service_inventory_manager[service_inventory_name].service["l2vpn"]
-            del root.srvc_inv__service_inventory_manager[service_inventory_name].service["l3vpn"]
             template = ncs.template.Template(service_inventory)
             tvars = ncs.template.Variables()
             tvars.add("INVENTORY", service_inventory_name)
@@ -59,6 +57,8 @@ class ServiceInventoryCallbacks(Service):
     def cb_create(self, tctx, root, service, proplist):
         """Create method for service."""
         self.log.info("Provisioning service-inventory group ", service.name)
+        # template = ncs.template.Template(service)
+        # template.apply("service-inventory-l2vpn-template")
 
 
 # ---------------------------------------------

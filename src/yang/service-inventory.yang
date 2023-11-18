@@ -66,6 +66,27 @@ module service-inventory {
         }
     }
 
+    typedef encapsulation-type {
+        type enumeration {
+            enum dot1q-2tags;
+            enum dot1q;
+            enum dot1ad;
+            enum e-default;
+            enum untagged;
+        }
+    }
+
+    typedef vlan-id-type {
+        type uint16 {
+            range "2..4094";
+        }
+        description
+          "The VLAN-ID that uniquely identifies a VLAN.  This is the 12-bit
+           VLAN-ID used in the VLAN Tag header.";
+        reference
+          "[802.1Q]";
+    }
+
     grouping l2vpn-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
@@ -102,6 +123,24 @@ module service-inventory {
                 leaf name {
                     tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
                     type string;
+                }
+
+                leaf encapsulation {
+                    tailf:info "Interface Encapsulation Type";
+                    type encapsulation-type;
+                    default "dot1q";
+                }
+
+                leaf s-vlan-id {
+                    when "../encapsulation = 'dot1ad' or ../encapsulation = 'dot1q-2tags'";
+                    tailf:info "Interface Encapsulation S-Vlan Id";
+                    type vlan-id-type;
+                }
+
+                leaf-list c-vlan-id {
+                    when "../encapsulation = 'dot1q-2tags' or ../encapsulation = 'dot1ad' or ../encapsulation = 'dot1q'";
+                    tailf:info "Interface Encapsulation C-Vlan Id";
+                    type vlan-id-type;
                 }
             }
 
