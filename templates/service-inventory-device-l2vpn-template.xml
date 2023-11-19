@@ -1,0 +1,21 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <service-inventory-manager xmlns="https://www.turktelekom.com.tr/service-inventory">
+    <name>{name}</name>
+    <devices tags="replace">
+      <?set-root-node {/devices}?>
+      <?foreach {services/service/l2vpn/endpoint}?>
+        <device>  
+          <name>{device}</name>
+          <?set DEVICE_NAME={device}?>
+          <?set PLATFORM={/device[name=$DEVICE_NAME]/platform/name}?> 
+          <?if {$PLATFORM="ios-xr"}?>
+            <?expand xr-device-l2vpn-macro?>
+          <?else?><!--if {$PLATFORM="ios-xr"}-->
+            <?expand xr-device-l2vpn-macro?>
+          <?end?><!--if {$PLATFORM="ios-xr"}-->
+            <?expand xr-device-l2vpn-macro?>
+        </device>
+      <?end?><!--foreach {service/l2vpn/endpoint}-->
+    </devices>
+  </service-inventory-manager>
+</config-template>

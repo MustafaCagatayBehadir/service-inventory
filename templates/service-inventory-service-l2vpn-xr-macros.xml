@@ -1,6 +1,6 @@
 <config-template xmlns="http://tail-f.com/ns/config/1.0">
   <!-- XR Interface Encapsulation Macro -->
-  <?macro xr-interface-parameters-macro?>
+  <?macro xr-service-interface-parameters-macro?>
     <?if {encapsulation/dot1ad}?><!--if {encapsulation/dot1ad}-->
       <encapsulation>dot1ad</encapsulation>
       <s-vlan-id>{encapsulation/dot1ad/vlan-id}</s-vlan-id>
@@ -20,49 +20,49 @@
   <?endmacro?>
   <!-- XR Interface Encapsulation Macro -->
   
-  <?macro xr-interface-macro?>
+  <?macro xr-service-interface-macro?>
     <?set IF_NAME={name}?>
     <?if {starts-with($IF_NAME, "GigabitEthernet")}?>
       <?set IF_ID={substring-after($IF_NAME, "GigabitEthernet")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/GigabitEthernet-subinterface/GigabitEthernet[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?elif {starts-with($IF_NAME, "TenGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
       <?set IF_ID={substring-after($IF_NAME, "TenGigE")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/TenGigE-subinterface/TenGigE[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?elif {starts-with($IF_NAME, "FortyGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
       <?set IF_ID={substring-after($IF_NAME, "FortyGigE")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/FortyGigE-subinterface/FortyGigE[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?elif {starts-with($IF_NAME, "FiftyGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
       <?set IF_ID={substring-after($IF_NAME, "FiftyGigE")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/FiftyGigE-subinterface/FiftyGigE[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?elif {starts-with($IF_NAME, "HundredGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
       <?set IF_ID={substring-after($IF_NAME, "HundredGigE")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/HundredGigE-subinterface/HundredGigE[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?elif {starts-with($IF_NAME, "Bundle-Ether")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
       <?set IF_ID={substring-after($IF_NAME, "Bundle-Ether")}?>
       <?set-context-node {/device[name=$DEVICE_NAME]/config/interface/Bundle-Ether-subinterface/Bundle-Ether[id=$IF_ID]}?>
       <pe-interface>
         <name>{$IF_NAME}</name>
-        <?expand xr-interface-parameters-macro?>
+        <?expand xr-service-interface-parameters-macro?>
       </pe-interface>
     <?end?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
   <?endmacro?>

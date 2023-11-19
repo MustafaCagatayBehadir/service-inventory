@@ -1,0 +1,21 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <service-inventory-manager xmlns="https://www.turktelekom.com.tr/service-inventory">
+    <name>{name}</name>
+    <services tags="replace">
+      <service>
+        <name>l2vpn</name>
+        <?set-root-node {/devices}?>
+        <?foreach {/device}?>
+          <?set DEVICE_NAME={name}?>
+          <?if {platform/name="ios-xr"}?>
+            <?expand xr-service-l2vpn-macro?>
+          <?elif {platform/name="huawei-vrp"}?><!--if {platform/name="ios-xr"}-->
+            <?expand xr-service-l2vpn-macro?>
+          <?else?>
+            <?expand xr-service-l2vpn-macro?>
+          <?end?><!--if {platform/name="ios-xr"}-->
+        <?end?><!--foreach {/device}-->
+      </service>
+    </services>
+  </service-inventory-manager>
+</config-template>

@@ -1,5 +1,6 @@
 """Service-Inventory Main Module."""
 import os
+import inspect
 import ncs
 import _ncs
 from ncs.application import Service
@@ -33,18 +34,33 @@ class OobDiscovery(ncs.dp.Action):
         # Check environment setting for IPC port value
         port = int(os.getenv("NCS_IPC_PORT", ncs.NCS_PORT))
         self.log.info("Using NCS IPC port value ##" + INDENTATION + str(port))
+        self.populate_service_inventory_manager_service_list(service_inventory_name)
+        self.populate_service_inventory_manager_device_list(service_inventory_name)
+        return ncs.CONFD_OK
 
+    def populate_service_inventory_manager_service_list(self, service_inventory_name):
+        """Populate service-inventory-manager service list."""
+        self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
             root = ncs.maagic.get_root(trans, shared=False)
             service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
             template = ncs.template.Template(service_inventory)
             tvars = ncs.template.Variables()
             tvars.add("INVENTORY", service_inventory_name)
-            template.apply("service-inventory-l2vpn-template", tvars)
-
+            template.apply("service-inventory-service-l2vpn-template", tvars)
             trans.apply()
 
-        return ncs.CONFD_OK
+    def populate_service_inventory_manager_device_list(self, service_inventory_name):
+        """Populate service-inventory-manager device list."""
+        self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
+        with ncs.maapi.single_write_trans(USER, "system") as trans:
+            root = ncs.maagic.get_root(trans, shared=False)
+            service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
+            template = ncs.template.Template(service_inventory)
+            tvars = ncs.template.Variables()
+            tvars.add("INVENTORY", service_inventory_name)
+            template.apply("service-inventory-device-l2vpn-template", tvars)
+            trans.apply()
 
 
 # ------------------------

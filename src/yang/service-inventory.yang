@@ -177,6 +177,55 @@ module service-inventory {
         }
     }
 
+    grouping device-service-inventory {
+        leaf name {
+            tailf:info "Device Name";
+            type leafref {
+                path "/ncs:devices/ncs:device/ncs:name";
+            }
+        }
+
+        list interface {
+            tailf:info "Device Physical Interface";
+
+            key "if-size if-number";
+
+            leaf if-size {
+                tailf:info "Interface size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
+                type string;
+            }
+
+            leaf if-number {
+                tailf:info "Interface id. Ex 0/0/0 | 0/0/0/0 | 1";
+                type string;
+            }
+
+            list service {
+                tailf:info "Inventory Service Type";
+
+                key name;
+
+                leaf name {
+                    tailf:info "Service Type";
+                    type service-id-type;
+                }
+
+                list l2vpn {
+                    when "../name = 'l2vpn'";
+                    tailf:info "L2VPN Device Service Inventory";
+                    key name;
+
+                    leaf name {
+                        tailf:info "L2VPN Service Name";
+                        type leafref {
+                            path "/srvc-inv:service-inventory-manager/services/service/l2vpn/name";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     list service-inventory-manager {
         description
           "Multi-vendor service inventory management.";
@@ -190,22 +239,36 @@ module service-inventory {
         uses ncs:service-data;
         ncs:servicepoint service-inventory-servicepoint;
 
-        list service {
-            tailf:info "Inventory Service Type";
+        container services {
+            tailf:info "Service Inventory Manager Service Database";
+            list service {
+                tailf:info "Inventory Service Type";
 
-            key name;
-
-            leaf name {
-                tailf:info "Service Type";
-                type service-id-type;
-            }
-
-            list l2vpn {
-                when "../name = 'l2vpn'";
-                tailf:info "L2VPN Service Inventory";
                 key name;
 
-                uses srvc-inv:l2vpn-grouping;
+                leaf name {
+                    tailf:info "Service Type";
+                    type service-id-type;
+                }
+
+                list l2vpn {
+                    when "../name = 'l2vpn'";
+                    tailf:info "L2VPN Service Inventory";
+                    key name;
+
+                    uses srvc-inv:l2vpn-grouping;
+                }
+            }
+        }
+
+        container devices {
+            tailf:info "Service Inventory Manager Device Database";
+            list device {
+                tailf:info "Service Inventory Device";
+
+                key name;
+
+                uses srvc-inv:device-service-inventory;
             }
         }
 

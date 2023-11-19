@@ -1,6 +1,6 @@
 <config-template xmlns="http://tail-f.com/ns/config/1.0">
   <!-- XR L2VPN MACRO -->
-  <?macro xr-l2vpn-macro?>
+  <?macro xr-service-l2vpn-macro?>
     <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
       <l2vpn>
         <name>{bridge-domain-name}</name>
@@ -8,7 +8,7 @@
         <endpoint>
           <device>{$DEVICE_NAME}</device>
           <?foreach {interface}?>
-            <?expand xr-interface-macro?>
+            <?expand xr-service-interface-macro?>
           <?end?><!--foreach {interface}-->
           <?foreach {vfi/neighbor}?>
             <neighbor>
@@ -24,7 +24,7 @@
   <!-- XR L2VPN MACRO -->
 
   <!-- VRP L2VPN MACRO -->
-  <?macro vrp-l2vpn-macro?>
+  <?macro vrp-service-l2vpn-macro?>
     <?foreach {config/vsi}?>
       <?set PW_ID={pwsignal/ldp/vsi-id}?>
       <?set VSI_NAME={name}?>
@@ -53,7 +53,7 @@
   <!-- VRP L2VPN MACRO -->
 
   <!-- SR L2VPN MACRO -->
-  <?macro sr-l2vpn-macro?>
+  <?macro sr-service-l2vpn-macro?>
     <?foreach {config/service/vpls}?>
       <l2vpn>
         <name>{service-id}</name>
