@@ -1,6 +1,6 @@
 <config-template xmlns="http://tail-f.com/ns/config/1.0">
   <!-- XR DEVICE L2VPN MACRO -->
-  <?macro xr-device-l2vpn-macro?>
+  <?macro xr-device-l2vpn-elan-macro?>
     <?foreach {pe-interface}?>
       <?set IF_NAME={name}?>
       <?if {starts-with($IF_NAME, "GigabitEthernet")}?>

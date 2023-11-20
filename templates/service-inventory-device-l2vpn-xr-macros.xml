@@ -8,9 +8,9 @@
       <if-number>{$IF_NUMBER}</if-number>
       <service>
         <name>l2vpn</name>
-        <l2vpn>
+        <elan>
           <name>{../../name}</name>
-        </l2vpn>
+        </elan>
       </service>        
     </interface>
   <?endmacro?>

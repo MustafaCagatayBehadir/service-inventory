@@ -1,8 +1,8 @@
 <config-template xmlns="http://tail-f.com/ns/config/1.0">
   <!-- XR L2VPN MACRO -->
-  <?macro xr-service-l2vpn-macro?>
+  <?macro xr-service-l2vpn-elan-macro?>
     <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
-      <l2vpn>
+      <elan>
         <name>{bridge-domain-name}</name>
         <mtu>{mtu}</mtu>
         <endpoint>
@@ -18,17 +18,17 @@
             </neighbor>
           <?end?><!--foreach {vfi/neighbor}-->
         </endpoint>
-      </l2vpn>
+      </elan>
     <?end?><!--foreach {config/l2vpn/bridge/group/bridge-domain}-->
   <?endmacro?>
   <!-- XR L2VPN MACRO -->
 
   <!-- VRP L2VPN MACRO -->
-  <?macro vrp-service-l2vpn-macro?>
+  <?macro vrp-service-l2vpn-elan-macro?>
     <?foreach {config/vsi}?>
       <?set PW_ID={pwsignal/ldp/vsi-id}?>
       <?set VSI_NAME={name}?>
-      <l2vpn>
+      <elan>
         <name>{name}</name>
         <mtu>{mtu}</mtu>
         <endpoint>
@@ -47,15 +47,15 @@
             </pe-interface>
           <?end?><!--foreach {config/interface/Ethernet}-->
         </endpoint>
-      </l2vpn>
+      </elan>
     <?end?><!--foreach {config/vsi}-->
   <?endmacro?>
   <!-- VRP L2VPN MACRO -->
 
   <!-- SR L2VPN MACRO -->
-  <?macro sr-service-l2vpn-macro?>
+  <?macro sr-service-l2vpn-elan-macro?>
     <?foreach {config/service/vpls}?>
-      <l2vpn>
+      <elan>
         <name>{service-id}</name>
         <mtu>{service-mtu}</mtu>
         <endpoint>
@@ -82,7 +82,7 @@
             </neighbor>
           <?end?><!--foreach {mesh-sdp}-->
         </endpoint>
-      </l2vpn>              
+      </elan>              
     <?end?><!--foreach {config/service/vpls}-->    
   <?endmacro?>
   <!-- SR L2VPN MACRO -->  

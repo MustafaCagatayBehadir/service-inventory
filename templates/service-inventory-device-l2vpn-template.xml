@@ -3,17 +3,17 @@
     <name>{name}</name>
     <devices tags="replace">
       <?set-root-node {/devices}?>
-      <?foreach {services/service/l2vpn/endpoint}?>
+      <?foreach {services/service/elan/endpoint}?>
         <device>  
           <name>{device}</name>
           <?set DEVICE_NAME={device}?>
           <?set PLATFORM={/device[name=$DEVICE_NAME]/platform/name}?> 
           <?if {$PLATFORM="ios-xr"}?>
-            <?expand xr-device-l2vpn-macro?>
+            <?expand xr-device-l2vpn-elan-macro?>
           <?else?><!--if {$PLATFORM="ios-xr"}-->
-            <?expand xr-device-l2vpn-macro?>
+            <?expand xr-device-l2vpn-elan-macro?>
           <?end?><!--if {$PLATFORM="ios-xr"}-->
-            <?expand xr-device-l2vpn-macro?>
+            <?expand xr-device-l2vpn-elan-macro?>
         </device>
       <?end?><!--foreach {service/l2vpn/endpoint}-->
     </devices>

@@ -1,0 +1,17 @@
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pylint]
+fail-under = 9.0
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = ["import-error"]

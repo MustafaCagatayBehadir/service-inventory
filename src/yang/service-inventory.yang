@@ -32,13 +32,6 @@ module service-inventory {
         }
     }
 
-    typedef service-id-type {
-        type enumeration {
-            enum l2vpn;
-            enum l3vpn;
-        }
-    }
-
     typedef mtu-type {
         type uint16;
     }
@@ -87,7 +80,14 @@ module service-inventory {
           "[802.1Q]";
     }
 
-    grouping l2vpn-grouping {
+    typedef service-type {
+        type enumeration {
+            enum l2vpn;
+            enum l3vpn;
+        }
+    }
+
+    grouping elan-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
             type srvc-inv-string;
@@ -207,10 +207,10 @@ module service-inventory {
 
                 leaf name {
                     tailf:info "Service Type";
-                    type service-id-type;
+                    type service-type;
                 }
 
-                list l2vpn {
+                list elan {
                     when "../name = 'l2vpn'";
                     tailf:info "L2VPN Device Service Inventory";
                     key name;
@@ -218,7 +218,7 @@ module service-inventory {
                     leaf name {
                         tailf:info "L2VPN Service Name";
                         type leafref {
-                            path "/srvc-inv:service-inventory-manager/services/service/l2vpn/name";
+                            path "/srvc-inv:service-inventory-manager/services/service/elan/name";
                         }
                     }
                 }
@@ -248,15 +248,15 @@ module service-inventory {
 
                 leaf name {
                     tailf:info "Service Type";
-                    type service-id-type;
+                    type service-type;
                 }
 
-                list l2vpn {
-                    when "../name = 'l2vpn'";
-                    tailf:info "L2VPN Service Inventory";
+                list elan {
+                    tailf:info "L2VPN ELAN Service Inventory";
+
                     key name;
 
-                    uses srvc-inv:l2vpn-grouping;
+                    uses srvc-inv:elan-grouping;
                 }
             }
         }
@@ -280,7 +280,7 @@ module service-inventory {
             input {
                 leaf service {
                     tailf:info "Service Id l2vpn | l3vpn";
-                    type service-id-type;
+                    type service-type;
                 }
             }
             output {

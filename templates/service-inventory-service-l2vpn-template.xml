@@ -8,11 +8,11 @@
         <?foreach {/device}?>
           <?set DEVICE_NAME={name}?>
           <?if {platform/name="ios-xr"}?>
-            <?expand xr-service-l2vpn-macro?>
+            <?expand xr-service-l2vpn-elan-macro?>
           <?elif {platform/name="huawei-vrp"}?><!--if {platform/name="ios-xr"}-->
-            <?expand xr-service-l2vpn-macro?>
+            <?expand xr-service-l2vpn-elan-macro?>
           <?else?>
-            <?expand xr-service-l2vpn-macro?>
+            <?expand xr-service-l2vpn-elan-macro?>
           <?end?><!--if {platform/name="ios-xr"}-->
         <?end?><!--foreach {/device}-->
       </service>
