@@ -87,6 +87,13 @@ module service-inventory {
         }
     }
 
+    typedef l2vpn-type {
+        type enumeration {
+            enum elan;
+            enum eline;
+        }
+    }
+
     grouping elan-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
@@ -278,9 +285,39 @@ module service-inventory {
         tailf:action oob-discovery {
             tailf:actionpoint oob-discovery-point;
             input {
-                leaf service {
+                list service {
                     tailf:info "Service Id l2vpn | l3vpn";
-                    type service-type;
+
+                    key name;
+
+                    leaf name {
+                        tailf:info "Service Type";
+                        type service-type;
+                    }
+                }
+            }
+            output {
+                leaf status {
+                    type string;
+                }
+            }
+        }
+
+        // /////////////////////////////////////////////////////////
+        // Service oob-reconcile action
+        // /////////////////////////////////////////////////////////
+        tailf:action oob-reconcile {
+            tailf:actionpoint oob-reconcile-point;
+            input {
+                list service {
+                    tailf:info "Service Id l2vpn | l3vpn";
+
+                    key name;
+
+                    leaf name {
+                        tailf:info "Service Type";
+                        type service-type;
+                    }
                 }
             }
             output {

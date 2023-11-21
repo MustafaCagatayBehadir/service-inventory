@@ -29,7 +29,7 @@ class OobDiscovery(ncs.dp.Action):
         self.log.info("Action triggered ##" + INDENTATION + name)
         _ncs.dp.action_set_timeout(uinfo, 1800)
         service_inventory_name = get_kp_service_id(kp)
-        self.log.info("Discovery Service Inventory  ##" + INDENTATION + service_inventory_name)
+        self.log.info("Service Inventory Discovery  ##" + INDENTATION + service_inventory_name)
         output.status = "success"
 
         # Check environment setting for IPC port value
@@ -65,6 +65,31 @@ class OobDiscovery(ncs.dp.Action):
 
 
 # ------------------------
+# Action CALLBACK
+# ------------------------
+class OobReconcile(ncs.dp.Action):
+    """Service-Inventory Reconcile Action Class."""
+
+    @ncs.dp.Action.action
+    def cb_action(self, uinfo, name, kp, input, output, trans):
+        """Reconcile service."""
+        self.log.info("Action triggered ##" + INDENTATION + name)
+        _ncs.dp.action_set_timeout(uinfo, 1800)
+        service_inventory_name = get_kp_service_id(kp)
+        self.log.info("Service Inventory Reconcile  ##" + INDENTATION + service_inventory_name)
+        output.status = "success"
+
+        # Check environment setting for IPC port value
+        port = int(os.getenv("NCS_IPC_PORT", ncs.NCS_PORT))
+        self.log.info("Using NCS IPC port value ##" + INDENTATION + str(port))
+
+    def populate_l2vpn_elan_list(self):
+        """Populate l2vpn elan services with reconcile no-networking."""
+        self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
+        
+
+
+# ------------------------
 # SERVICE CALLBACK
 # ------------------------
 class ServiceInventoryCallbacks(Service):
@@ -92,7 +117,11 @@ class Main(ncs.application.Application):
         # servce-inventory service registration
         self.register_service("service-inventory-servicepoint", ServiceInventoryCallbacks)
 
+        # servce-inventory discovery action registration
         self.register_action("oob-discovery-point", OobDiscovery)
+
+        # servce-inventory reconcile action registration
+        self.register_action("oob-reconcile-point", OobReconcile)
 
     def teardown(self):
         """Teardown."""
