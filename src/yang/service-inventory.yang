@@ -59,6 +59,18 @@ module service-inventory {
         }
     }
 
+    typedef l2vpn-index-type {
+        type uint8 {
+            range "1..24";
+        }
+    }
+
+    typedef subif-id-type {
+        type uint16 {
+            range "2..4094";
+        }
+    }
+
     typedef encapsulation-type {
         type enumeration {
             enum dot1q-2tags;
@@ -94,6 +106,13 @@ module service-inventory {
         }
     }
 
+    grouping commit-params-grp {
+        leaf dry-run {
+            tailf:info "Display the configuration changes but do not perform the actual commit.";
+            type empty;
+        }
+    }
+
     grouping elan-grouping {
         leaf name {
             tailf:info "L2VPN Service Name";
@@ -125,11 +144,26 @@ module service-inventory {
             list pe-interface {
                 tailf:info "PE Device Interface";
 
-                key "name";
+                key "id-int";
 
-                leaf name {
+                leaf id-int {
+                    tailf:info "Just a number used as index";
+                    type l2vpn-index-type;
+                }
+
+                leaf if-size {
                     tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
                     type string;
+                }
+
+                leaf if-number {
+                    tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
+                    type string;
+                }
+
+                leaf subif-id {
+                    tailf:info "Subinterface Id";
+                    type subif-id-type;
                 }
 
                 leaf encapsulation {
@@ -282,23 +316,25 @@ module service-inventory {
         // /////////////////////////////////////////////////////////
         // Service oob-discovery action
         // /////////////////////////////////////////////////////////
-        tailf:action oob-discovery {
-            tailf:actionpoint oob-discovery-point;
-            input {
-                list service {
-                    tailf:info "Service Id l2vpn | l3vpn";
+        container service-discovery {
+            tailf:action oob-discovery {
+                tailf:actionpoint oob-discovery-point;
+                input {
+                    list service {
+                        tailf:info "Service Id l2vpn | l3vpn";
 
-                    key name;
+                        key name;
 
-                    leaf name {
-                        tailf:info "Service Type";
-                        type service-type;
+                        leaf name {
+                            tailf:info "Service Type";
+                            type service-type;
+                        }
                     }
                 }
-            }
-            output {
-                leaf status {
-                    type string;
+                output {
+                    leaf status {
+                        type string;
+                    }
                 }
             }
         }
@@ -306,23 +342,41 @@ module service-inventory {
         // /////////////////////////////////////////////////////////
         // Service oob-reconcile action
         // /////////////////////////////////////////////////////////
-        tailf:action oob-reconcile {
-            tailf:actionpoint oob-reconcile-point;
-            input {
-                list service {
-                    tailf:info "Service Id l2vpn | l3vpn";
+        container service-reconcile {
+            tailf:action oob-reconcile {
+                tailf:actionpoint oob-reconcile-point;
+                input {
+                    list service {
+                        tailf:info "Service Id l2vpn | l3vpn";
 
-                    key name;
+                        key name;
 
-                    leaf name {
-                        tailf:info "Service Type";
-                        type service-type;
+                        leaf name {
+                            tailf:info "Service Type";
+                            type service-type;
+                        }
+
+                        list elan {
+                            when "../name='l2vpn'";
+                            tailf:info "L2VPN ELAN Service Inventory";
+
+                            key name;
+
+                            leaf name {
+                                tailf:info "L2VPN ELAN Service Name";
+                                type leafref {
+                                    path "../../../../../srvc-inv:services/srvc-inv:service/srvc-inv:elan/srvc-inv:name";
+                                }
+                            }
+                        }
                     }
+
+                    uses srvc-inv:commit-params-grp;
                 }
-            }
-            output {
-                leaf status {
-                    type string;
+                output {
+                    leaf result {
+                        type string;
+                    }
                 }
             }
         }

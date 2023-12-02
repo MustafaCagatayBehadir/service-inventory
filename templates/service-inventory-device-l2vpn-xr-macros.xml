@@ -1,11 +1,9 @@
-<config-template xmlns="http://tail-f.com/ns/config/1.0">
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
   <!-- XR Interface Parameters Macro -->
   <?macro xr-device-interface-parameters-macro?>
-    <?set IF_ID={substring-after($IF_NAME, $IF_SIZE)}?>
-    <?set IF_NUMBER={substring-before($IF_ID, ".")}?>
     <interface>
-      <if-size>{$IF_SIZE}</if-size>
-      <if-number>{$IF_NUMBER}</if-number>
+      <if-size>{if-size}</if-size>
+      <if-number>{if-number}</if-number>
       <service>
         <name>l2vpn</name>
         <elan>

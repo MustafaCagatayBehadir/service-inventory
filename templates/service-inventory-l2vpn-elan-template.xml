@@ -1,0 +1,27 @@
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
+  <l2vpn xmlns='https://www.turktelekom.com.tr/l2vpn'>
+    <?foreach {services/service/elan}?>
+      <elan>
+        <name>{name}</name>
+        <pw-id>{endpoint[1]/neighbor[1]/pw-id}</pw-id>
+        <mtu>{mtu}</mtu>
+        <?foreach {endpoint}?>
+          <endpoint>
+            <device>{device}</device>
+            <?foreach {pe-interface}?>
+              <pe-interface>
+                <id-int>{id-int}</id-int>
+                <if-size>{if-size}</if-size>
+                <if-number>{if-number}</if-number>
+                <subif-id>{subif-id}</subif-id>
+                <encapsulation>{encapsulation}</encapsulation>
+                <s-vlan-id when='{s-vlan-id}'>{s-vlan-id}</s-vlan-id>
+                <c-vlan-id when='{c-vlan-id}'>{c-vlan-id}</c-vlan-id>
+              </pe-interface>
+            <?end?><!--foreach {pe-interface}-->
+          </endpoint>
+        <?end?><!--foreach {endpoint}-->
+      </elan>
+    <?end?><!--foreach {services/service/elan}-->
+  </l2vpn>
+</config-template>

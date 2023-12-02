@@ -1,4 +1,4 @@
-<config-template xmlns="http://tail-f.com/ns/config/1.0">
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
   <!-- XR L2VPN MACRO -->
   <?macro xr-service-l2vpn-elan-macro?>
     <?foreach {config/l2vpn/bridge/group/bridge-domain}?>
@@ -7,8 +7,10 @@
         <mtu>{mtu}</mtu>
         <endpoint>
           <device>{$DEVICE_NAME}</device>
+          <?set i=1?>
           <?foreach {interface}?>
             <?expand xr-service-interface-macro?>
+            <?set i={$i+1}?>
           <?end?><!--foreach {interface}-->
           <?foreach {vfi/neighbor}?>
             <neighbor>

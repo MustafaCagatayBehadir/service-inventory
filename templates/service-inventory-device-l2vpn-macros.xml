@@ -1,27 +1,8 @@
-<config-template xmlns="http://tail-f.com/ns/config/1.0">
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
   <!-- XR DEVICE L2VPN MACRO -->
   <?macro xr-device-l2vpn-elan-macro?>
     <?foreach {pe-interface}?>
-      <?set IF_NAME={name}?>
-      <?if {starts-with($IF_NAME, "GigabitEthernet")}?>
-        <?set IF_SIZE="GigabitEthernet"?>
-        <?expand xr-device-interface-parameters-macro?>
-      <?elif {starts-with($IF_NAME, "TenGigE")}?><!--if {starts-with(name, "GigabitEthernet")}-->
-        <?set IF_SIZE="TenGigE"?>
-        <?expand xr-device-interface-parameters-macro?>
-      <?elif {starts-with($IF_NAME, "FortyGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}--> 
-        <?set IF_SIZE="FortyGigE"?>
-        <?expand xr-device-interface-parameters-macro?>
-      <?elif {starts-with($IF_NAME, "FiftyGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
-        <?set IF_SIZE="FiftyGigE"?>
-        <?expand xr-device-interface-parameters-macro?>
-      <?elif {starts-with($IF_NAME, "HundredGigE")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
-        <?set IF_SIZE="HundredGigE"?>
-        <?expand xr-device-interface-parameters-macro?>
-      <?elif {starts-with($IF_NAME, "Bundle-Ether")}?><!--if {starts-with($IF_NAME, "GigabitEthernet")}-->
-        <?set IF_SIZE="Bundle-Ether"?>
-        <?expand xr-device-interface-parameters-macro?>  
-      <?end?><!--if {starts-with(name, "GigabitEthernet")}-->
+      <?expand xr-device-interface-parameters-macro?>
     <?end?><!--foreach {pe-interface}-->    
   <?endmacro?>
   <!-- XR DEVICE L2VPN MACRO -->

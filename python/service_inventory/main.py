@@ -13,8 +13,39 @@ USER = "admin"
 def get_kp_service_id(keypath: ncs.maagic.keypath._KeyPath) -> str:
     """Get service name from keypath."""
     kpath = str(keypath)
-    service = kpath[kpath.rfind("{") + 1 : len(kpath) - 1]
+    service = kpath[kpath.rfind("{") + 1 : kpath.rfind("}")]
     return service
+
+
+def prepare_device_dry_run(device_name, config_changes, log) -> str:
+    """Build dry-run changes string for given device."""
+    log.info(f"collecting dry run changes for {device_name}")
+
+    result = f"\n\n################ Device: {device_name} ################\n\n"
+    result += str(config_changes)
+    result += "\n"
+
+    return result
+
+
+def commit_config(input, commit_params, trans, log) -> str:
+    """Process commit parameters and report the result."""
+    result = ""
+
+    if input.dry_run:
+        commit_params.dry_run_native()
+        log.info("providing dry run changes")
+        dry_output = trans.apply_params(True, commit_params)
+        if "device" in dry_output:
+            for device in dry_output["device"]:
+                result += prepare_device_dry_run(device, dry_output["device"][device], log)
+        else:
+            result += "no changes\n"
+        return result
+
+    log.info("committing the changes")
+    trans.apply_params(True, commit_params)
+    return result
 
 
 # ------------------------
@@ -43,24 +74,20 @@ class OobDiscovery(ncs.dp.Action):
         """Populate service-inventory-manager service list."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
-            root = ncs.maagic.get_root(trans, shared=False)
+            root = ncs.maagic.get_root(trans)
             service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
             template = ncs.template.Template(service_inventory)
-            tvars = ncs.template.Variables()
-            tvars.add("INVENTORY", service_inventory_name)
-            template.apply("service-inventory-service-l2vpn-template", tvars)
+            template.apply("service-inventory-service-l2vpn-template")
             trans.apply()
 
     def populate_service_inventory_manager_device_list(self, service_inventory_name):
         """Populate service-inventory-manager device list."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
-            root = ncs.maagic.get_root(trans, shared=False)
+            root = ncs.maagic.get_root(trans)
             service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
             template = ncs.template.Template(service_inventory)
-            tvars = ncs.template.Variables()
-            tvars.add("INVENTORY", service_inventory_name)
-            template.apply("service-inventory-device-l2vpn-template", tvars)
+            template.apply("service-inventory-device-l2vpn-template")
             trans.apply()
 
 
@@ -77,16 +104,29 @@ class OobReconcile(ncs.dp.Action):
         _ncs.dp.action_set_timeout(uinfo, 1800)
         service_inventory_name = get_kp_service_id(kp)
         self.log.info("Service Inventory Reconcile  ##" + INDENTATION + service_inventory_name)
-        output.status = "success"
+        output.result = ""
 
         # Check environment setting for IPC port value
         port = int(os.getenv("NCS_IPC_PORT", ncs.NCS_PORT))
         self.log.info("Using NCS IPC port value ##" + INDENTATION + str(port))
+        commit_result = self.populate_l2vpn_elan_list(service_inventory_name, input)
+        if commit_result == "":
+            output.result += "\nNothing will push to the network."
+        else:
+            output.result += commit_result
 
-    def populate_l2vpn_elan_list(self):
+    def populate_l2vpn_elan_list(self, service_inventory_name, input):
         """Populate l2vpn elan services with reconcile no-networking."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
-        
+        with ncs.maapi.single_write_trans(USER, "system") as trans:
+            root = ncs.maagic.get_root(trans)
+            service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
+            template = ncs.template.Template(service_inventory)
+            template.apply("service-inventory-l2vpn-elan-template")
+            commit_params = ncs.maapi.CommitParams()
+            commit_params.reconcile_keep_non_service_config()
+            commit_result = commit_config(input, commit_params, trans, self.log)
+            return commit_result
 
 
 # ------------------------
@@ -102,6 +142,7 @@ class ServiceInventoryCallbacks(Service):
         template = ncs.template.Template(service)
         template.apply("service-inventory-service-l2vpn-template")
         template.apply("service-inventory-device-l2vpn-template")
+        template.apply("service-inventory-l2vpn-elan-template")
 
 
 # ---------------------------------------------
