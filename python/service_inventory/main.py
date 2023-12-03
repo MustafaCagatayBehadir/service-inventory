@@ -130,6 +130,22 @@ class OobReconcile(ncs.dp.Action):
 
 
 # ------------------------
+# Action CALLBACK
+# ------------------------
+class OobMigration(ncs.dp.Action):
+    """Service-Inventory Migration Action Class."""
+
+    @ncs.dp.Action.action
+    def cb_action(self, uinfo, name, kp, input, output, trans):
+        """Migrate service."""
+        self.log.info("Action triggered ##" + INDENTATION + name)
+        _ncs.dp.action_set_timeout(uinfo, 1800)
+        service_inventory_name = get_kp_service_id(kp)
+        self.log.info("Service Inventory Migration  ##" + INDENTATION + service_inventory_name)
+        output.result = ""
+
+
+# ------------------------
 # SERVICE CALLBACK
 # ------------------------
 class ServiceInventoryCallbacks(Service):
@@ -163,6 +179,9 @@ class Main(ncs.application.Application):
 
         # servce-inventory reconcile action registration
         self.register_action("oob-reconcile-point", OobReconcile)
+
+        # servce-inventory migration action registration
+        self.register_action("oob-migration-point", OobMigration)
 
     def teardown(self):
         """Teardown."""

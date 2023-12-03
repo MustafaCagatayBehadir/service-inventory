@@ -13,6 +13,9 @@ module service-inventory {
     import tailf-ncs {
         prefix ncs;
     }
+    import inventory {
+        prefix inv;
+    }
 
     description
       "Service inventory for multi-vendor service inventory management.";
@@ -99,14 +102,7 @@ module service-inventory {
         }
     }
 
-    typedef l2vpn-type {
-        type enumeration {
-            enum elan;
-            enum eline;
-        }
-    }
-
-    grouping commit-params-grp {
+    grouping commit-params-grouping {
         leaf dry-run {
             tailf:info "Display the configuration changes but do not perform the actual commit.";
             type empty;
@@ -153,12 +149,17 @@ module service-inventory {
 
                 leaf if-size {
                     tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
-                    type string;
+                    type leafref {
+                        path "/inv:inventory-manager/inv:device[inv:name=current()/../../device]/inv:interface/inv:if-size";
+                    }
                 }
 
                 leaf if-number {
+                    when "../if-size";
                     tailf:info "Interface Size.Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
-                    type string;
+                    type leafref {
+                        path "/inv:inventory-manager/inv:device[inv:name=current()/../../device]/inv:interface[inv:if-size=current()/../if-size]/inv:if-number";
+                    }
                 }
 
                 leaf subif-id {
@@ -218,7 +219,7 @@ module service-inventory {
         }
     }
 
-    grouping device-service-inventory {
+    grouping device-service-inventory-grouping {
         leaf name {
             tailf:info "Device Name";
             type leafref {
@@ -267,6 +268,29 @@ module service-inventory {
         }
     }
 
+    grouping service-inventory-migration-grouping {
+        leaf device {
+            tailf:info "Device Name";
+            type leafref {
+                path "/ncs:devices/ncs:device/ncs:name";
+            }
+        }
+
+        leaf if-size {
+            tailf:info "Interface size. Ex GigabitEthernet | TenGigabitEthernet | FortyGigE | HundredGigE | Port-channel";
+            type leafref {
+                path "/inv:inventory-manager/inv:device[inv:name=current()/../device]/inv:interface/inv:if-size";
+            }
+        }
+
+        leaf if-number {
+            tailf:info "Interface id. Ex 0/0/0 | 0/0/0/0 | 1";
+            type leafref {
+                path "/inv:inventory-manager/inv:device[inv:name=current()/../device]/inv:interface[inv:if-size=current()/../if-size]/inv:if-number";
+            }
+        }
+    }
+
     list service-inventory-manager {
         description
           "Multi-vendor service inventory management.";
@@ -309,7 +333,7 @@ module service-inventory {
 
                 key name;
 
-                uses srvc-inv:device-service-inventory;
+                uses srvc-inv:device-service-inventory-grouping;
             }
         }
 
@@ -371,10 +395,37 @@ module service-inventory {
                         }
                     }
 
-                    uses srvc-inv:commit-params-grp;
+                    uses srvc-inv:commit-params-grouping;
                 }
                 output {
                     leaf result {
+                        type string;
+                    }
+                }
+            }
+        }
+
+        // /////////////////////////////////////////////////////////
+        // Service oob-migrate action
+        // /////////////////////////////////////////////////////////
+        container service-migration {
+            tailf:action oob-migration {
+                tailf:actionpoint oob-migration-point;
+
+                input {
+                    container source {
+                        tailf:info "Source device information";
+                        uses srvc-inv:service-inventory-migration-grouping;
+                    }
+
+                    container destination {
+                        tailf:info "Destination device information";
+                        uses srvc-inv:service-inventory-migration-grouping;
+                    }
+                }
+
+                output {
+                    leaf status {
                         type string;
                     }
                 }

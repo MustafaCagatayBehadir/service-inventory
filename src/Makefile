@@ -8,10 +8,8 @@ SRC = $(wildcard yang/*.yang)
 DIRS = ../load-dir
 FXS = $(SRC:yang/%.yang=../load-dir/%.fxs)
 
-## Uncomment and patch the line below if you have a dependency to a NED
-## or to other YANG files
-# YANGPATH += ../../<ned-name>/src/ncsc-out/modules/yang \
-# 	../../<pkt-name>/src/yang
+
+YANGPATH += ../../inventory/src/yang
 
 NCSCPATH   = $(YANGPATH:%=--yangpath %)
 YANGERPATH = $(YANGPATH:%=--path %)
