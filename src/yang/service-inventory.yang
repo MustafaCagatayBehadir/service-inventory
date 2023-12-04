@@ -413,6 +413,12 @@ module service-inventory {
                 tailf:actionpoint oob-migration-point;
 
                 input {
+
+                    leaf service {
+                        tailf:info "Service Type";
+                        type service-type;
+                    }
+
                     container source {
                         tailf:info "Source device information";
                         uses srvc-inv:service-inventory-migration-grouping;
@@ -425,7 +431,7 @@ module service-inventory {
                 }
 
                 output {
-                    leaf status {
+                    leaf result {
                         type string;
                     }
                 }

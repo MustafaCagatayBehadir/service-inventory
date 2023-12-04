@@ -1,6 +1,7 @@
 """Service-Inventory Main Module."""
 import inspect
 import os
+from typing import List
 
 import _ncs
 import ncs
@@ -17,7 +18,7 @@ def get_kp_service_id(keypath: ncs.maagic.keypath._KeyPath) -> str:
     return service
 
 
-def prepare_device_dry_run(device_name, config_changes, log) -> str:
+def prepare_device_dry_run(device_name: str, config_changes: str, log: ncs.log.Log) -> str:
     """Build dry-run changes string for given device."""
     log.info(f"collecting dry run changes for {device_name}")
 
@@ -28,7 +29,9 @@ def prepare_device_dry_run(device_name, config_changes, log) -> str:
     return result
 
 
-def commit_config(input, commit_params, trans, log) -> str:
+def commit_config(
+    input: ncs.maagic.Container, commit_params: ncs.maapi.CommitParams, trans: ncs.maapi.Transaction, log: ncs.log.Log
+) -> str:
     """Process commit parameters and report the result."""
     result = ""
 
@@ -70,7 +73,7 @@ class OobDiscovery(ncs.dp.Action):
         self.populate_service_inventory_manager_device_list(service_inventory_name)
         return ncs.CONFD_OK
 
-    def populate_service_inventory_manager_service_list(self, service_inventory_name):
+    def populate_service_inventory_manager_service_list(self, service_inventory_name: str):
         """Populate service-inventory-manager service list."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
@@ -80,7 +83,7 @@ class OobDiscovery(ncs.dp.Action):
             template.apply("service-inventory-service-l2vpn-template")
             trans.apply()
 
-    def populate_service_inventory_manager_device_list(self, service_inventory_name):
+    def populate_service_inventory_manager_device_list(self, service_inventory_name: str):
         """Populate service-inventory-manager device list."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
@@ -115,7 +118,7 @@ class OobReconcile(ncs.dp.Action):
         else:
             output.result += commit_result
 
-    def populate_l2vpn_elan_list(self, service_inventory_name, input):
+    def populate_l2vpn_elan_list(self, service_inventory_name: str, input: ncs.maagic.Container) -> str:
         """Populate l2vpn elan services with reconcile no-networking."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
@@ -143,6 +146,72 @@ class OobMigration(ncs.dp.Action):
         service_inventory_name = get_kp_service_id(kp)
         self.log.info("Service Inventory Migration  ##" + INDENTATION + service_inventory_name)
         output.result = ""
+
+        source = input.source
+        src_dev, src_if_size, src_if_number = source.device, source.if_size, source.if_number
+        destination = input.destination
+        dest_dev, dest_if_size, dest_if_number = destination.device, destination.if_size, destination.if_number
+
+        if input.service == "l2vpn":
+            elan_srv_nodes = self.get_l2vpn_elan_service_nodes(
+                service_inventory_name, src_dev, src_if_size, src_if_number
+            )
+            self.migrate_l2vpn_elan_service_nodes(
+                elan_srv_nodes, src_dev, src_if_size, src_if_number, dest_dev, dest_if_size, dest_if_number
+            )
+
+    def get_l2vpn_elan_service_nodes(
+        self, service_inventory_name: str, device: str, if_size: str, if_number: str
+    ) -> List[ncs.maagic.ListElement]:
+        """Get source device l2vpn elan service nodes."""
+        self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
+        with ncs.maapi.single_read_trans(USER, "system") as trans:
+            root = ncs.maagic.get_root(trans)
+            service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
+            srvc_inv_dev_intf = service_inventory.srvc_inv__devices.device[device].interface[if_size, if_number]
+            srvc_inv_dev_intf_l2vpn = srvc_inv_dev_intf.srvc_inv__service["l2vpn"]
+
+            l2vpn = root.l2vpn__l2vpn
+            elan_srv_nodes = []
+            for elan in srvc_inv_dev_intf_l2vpn.elan:
+                elan_name = elan.name
+                elan_srv_nodes.append(l2vpn.l2vpn__elan[elan.name])
+                self.log.info("Elan ##" + INDENTATION * 2 + elan_name + " is added to elan node list.")
+        return elan_srv_nodes
+
+    def migrate_l2vpn_elan_service_nodes(
+        self,
+        elan_srv_nodes: List[ncs.maagic.ListElement],
+        src_dev: str,
+        src_if_size: str,
+        src_if_number: str,
+        dest_dev: str,
+        dest_if_size: str,
+        dest_if_number: str,
+    ):
+        """Migrate l2vpn elan endpoint interface configurations."""
+        with ncs.maapi.single_write_trans(USER, "system") as trans:
+            for elan_srv in elan_srv_nodes:
+                src_ep = elan_srv.l2vpn__endpoint[src_dev]
+                dest_ep = elan_srv.l2vpn__endpoint.create(dest_dev)
+                self.log.info("Endpoint ##" + INDENTATION * 2 + dest_dev + " is created. ")
+
+                for src_intf in src_ep.l2vpn__pe_interface:
+                    if src_intf.if_size == src_if_size and src_intf.if_number == src_if_number:
+                        if_id = src_intf.id_int
+                        dest_intf = dest_ep.l2vpn__pe_interface.create(if_id)
+                        self.log.info("Endpoint interface ##" + if_id + " is created. ")
+                        trans.shared_copy_tree(getattr(src_intf, "_path"), getattr(dest_intf, "_path"))
+                        dest_intf.if_size, dest_intf.if_number = (
+                            dest_if_size,
+                            dest_if_number,
+                        )  # Destination if-size and if-number is re-setted based on action input. Because copy-tree sets the same values from souce device interface.
+                        del src_intf  # Source interface is deleted for config clean up.
+                        break
+
+                if len(src_ep.l2vpn__pe_interface):
+                    del src_ep  # Source endpoint is deleted if there is no remaining configured interface.
+            trans.apply()
 
 
 # ------------------------
