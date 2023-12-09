@@ -428,6 +428,8 @@ module service-inventory {
                         tailf:info "Destination device information";
                         uses srvc-inv:service-inventory-migration-grouping;
                     }
+
+                    uses srvc-inv:commit-params-grouping;
                 }
 
                 output {

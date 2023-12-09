@@ -151,67 +151,81 @@ class OobMigration(ncs.dp.Action):
         src_dev, src_if_size, src_if_number = source.device, source.if_size, source.if_number
         destination = input.destination
         dest_dev, dest_if_size, dest_if_number = destination.device, destination.if_size, destination.if_number
+        root = ncs.maagic.get_root(trans)
 
         if input.service == "l2vpn":
-            elan_srv_nodes = self.get_l2vpn_elan_service_nodes(
-                service_inventory_name, src_dev, src_if_size, src_if_number
+            elan_srv_names = self.get_l2vpn_elan_service_names(
+                service_inventory_name, src_dev, src_if_size, src_if_number, root
             )
-            self.migrate_l2vpn_elan_service_nodes(
-                elan_srv_nodes, src_dev, src_if_size, src_if_number, dest_dev, dest_if_size, dest_if_number
+            output.result += self.migrate_l2vpn_elan_service_nodes(
+                elan_srv_names,
+                src_dev,
+                src_if_size,
+                src_if_number,
+                dest_dev,
+                dest_if_size,
+                dest_if_number,
+                input,
             )
 
-    def get_l2vpn_elan_service_nodes(
-        self, service_inventory_name: str, device: str, if_size: str, if_number: str
-    ) -> List[ncs.maagic.ListElement]:
+    def get_l2vpn_elan_service_names(
+        self, service_inventory_name: str, device: str, if_size: str, if_number: str, root: ncs.maagic.Root
+    ) -> List[str]:
         """Get source device l2vpn elan service nodes."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
-        with ncs.maapi.single_read_trans(USER, "system") as trans:
-            root = ncs.maagic.get_root(trans)
-            service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
-            srvc_inv_dev_intf = service_inventory.srvc_inv__devices.device[device].interface[if_size, if_number]
-            srvc_inv_dev_intf_l2vpn = srvc_inv_dev_intf.srvc_inv__service["l2vpn"]
+        service_inventory = root.srvc_inv__service_inventory_manager[service_inventory_name]
+        srvc_inv_dev_intf = service_inventory.srvc_inv__devices.device[device].interface[if_size, if_number]
+        srvc_inv_dev_intf_l2vpn = srvc_inv_dev_intf.srvc_inv__service["l2vpn"]
 
-            l2vpn = root.l2vpn__l2vpn
-            elan_srv_nodes = []
-            for elan in srvc_inv_dev_intf_l2vpn.elan:
-                elan_name = elan.name
-                elan_srv_nodes.append(l2vpn.l2vpn__elan[elan.name])
-                self.log.info("Elan ##" + INDENTATION * 2 + elan_name + " is added to elan node list.")
-        return elan_srv_nodes
+        elan_srv_names = []
+        for elan in srvc_inv_dev_intf_l2vpn.elan:
+            elan_name = elan.name
+            elan_srv_names.append(elan_name)
+            self.log.info("Elan ##" + INDENTATION * 2 + elan_name + " is added to elan service name list.")
+        return elan_srv_names
 
     def migrate_l2vpn_elan_service_nodes(
         self,
-        elan_srv_nodes: List[ncs.maagic.ListElement],
+        elan_srv_names: List[str],
         src_dev: str,
         src_if_size: str,
         src_if_number: str,
         dest_dev: str,
         dest_if_size: str,
         dest_if_number: str,
+        input: ncs.maagic.Container,
     ):
         """Migrate l2vpn elan endpoint interface configurations."""
+        self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
         with ncs.maapi.single_write_trans(USER, "system") as trans:
-            for elan_srv in elan_srv_nodes:
-                src_ep = elan_srv.l2vpn__endpoint[src_dev]
-                dest_ep = elan_srv.l2vpn__endpoint.create(dest_dev)
-                self.log.info("Endpoint ##" + INDENTATION * 2 + dest_dev + " is created. ")
-
-                for src_intf in src_ep.l2vpn__pe_interface:
-                    if src_intf.if_size == src_if_size and src_intf.if_number == src_if_number:
-                        if_id = src_intf.id_int
-                        dest_intf = dest_ep.l2vpn__pe_interface.create(if_id)
-                        self.log.info("Endpoint interface ##" + if_id + " is created. ")
-                        trans.shared_copy_tree(getattr(src_intf, "_path"), getattr(dest_intf, "_path"))
-                        dest_intf.if_size, dest_intf.if_number = (
-                            dest_if_size,
-                            dest_if_number,
-                        )  # Destination if-size and if-number is re-setted based on action input. Because copy-tree sets the same values from souce device interface.
-                        del src_intf  # Source interface is deleted for config clean up.
-                        break
-
-                if len(src_ep.l2vpn__pe_interface):
-                    del src_ep  # Source endpoint is deleted if there is no remaining configured interface.
-            trans.apply()
+            root = ncs.maagic.get_root(trans)
+            l2vpn = root.l2vpn__l2vpn
+            for elan_name in elan_srv_names:
+                elan_srv = l2vpn.l2vpn__elan[elan_name]
+                template = ncs.template.Template(elan_srv)
+                tvars = ncs.template.Variables()
+                tvars.add("SRC_DEVICE", src_dev)
+                tvars.add("SRC_IF_SIZE", src_if_size)
+                tvars.add("SRC_IF_NUMBER", src_if_number)
+                tvars.add("DEST_DEVICE", dest_dev)
+                tvars.add("DEST_IF_SIZE", dest_if_size)
+                tvars.add("DEST_IF_NUMBER", dest_if_number)
+                self.log.info(
+                    "Elan ##"
+                    + INDENTATION * 2
+                    + elan_name
+                    + " service-inventory-migration-l2vpn-elan-template is applying..."
+                )
+                template.apply("service-inventory-migration-l2vpn-elan-template", tvars)
+                self.log.info(
+                    "Elan ##"
+                    + INDENTATION * 2
+                    + elan_name
+                    + " service-inventory-migration-l2vpn-elan-template is applied."
+                )
+            commit_params = ncs.maapi.CommitParams()
+            commit_result = commit_config(input, commit_params, trans, self.log)
+        return commit_result
 
 
 # ------------------------
@@ -224,10 +238,6 @@ class ServiceInventoryCallbacks(Service):
     def cb_create(self, tctx, root, service, proplist):
         """Create method for service."""
         self.log.info("Provisioning service-inventory group ", service.name)
-        template = ncs.template.Template(service)
-        template.apply("service-inventory-service-l2vpn-template")
-        template.apply("service-inventory-device-l2vpn-template")
-        template.apply("service-inventory-l2vpn-elan-template")
 
 
 # ---------------------------------------------

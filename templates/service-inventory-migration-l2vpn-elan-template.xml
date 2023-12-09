@@ -1,0 +1,28 @@
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
+    <l2vpn xmlns='https://www.turktelekom.com.tr/l2vpn'>
+        <elan>
+            <name>{name}</name>
+            <?set IF_ID={endpoint[device=$SRC_DEVICE]/pe-interface[if-size=$SRC_IF_SIZE][if-number=$SRC_IF_NUMBER]/id-int}?>
+            <endpoint>
+                <device>{$DEST_DEVICE}</device>
+                <pe-interface>
+                    <id-int>{$IF_ID}</id-int>
+                    <?copy-tree {/endpoint[device=$SRC_DEVICE]/pe-interface[id-int=$IF_ID]}?>
+                    <if-size>{$DEST_IF_SIZE}</if-size>
+                    <if-number>{$DEST_IF_NUMBER}</if-number>
+                </pe-interface>
+            </endpoint>
+            <endpoint>
+                <device>{$SRC_DEVICE}</device>
+                <pe-interface tags="delete">
+                    <id-int>{$IF_ID}</id-int>
+                </pe-interface>
+            </endpoint>
+            <?if {count(/endpoint[device=$SRC_DEVICE]/pe-interface)=0}?>
+                <endpoint tags="delete">
+                    <device>{$SRC_DEVICE}</device>
+                </endpoint>                         
+            <?end?><!--if {count(/endpoint[device=$SRC_DEVICE]/pe-interface)=0}-->
+        </elan>
+    </l2vpn>
+</config-template>
