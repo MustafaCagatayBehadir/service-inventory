@@ -6,16 +6,9 @@
       <?foreach {services/service/elan/endpoint}?>
         <device>  
           <name>{device}</name>
-          <?set DEVICE_NAME={device}?>
-          <?set PLATFORM={/device[name=$DEVICE_NAME]/platform/name}?> 
-          <?if {$PLATFORM='ios-xr'}?>
-            <?expand xr-device-l2vpn-elan-macro?>
-          <?else?><!--if {$PLATFORM='ios-xr'}-->
-            <?expand xr-device-l2vpn-elan-macro?>
-          <?end?><!--if {$PLATFORM='ios-xr'}-->
-            <?expand xr-device-l2vpn-elan-macro?>
+            <?expand device-l2vpn-elan-macro?>
         </device>
-      <?end?><!--foreach {service/l2vpn/endpoint}-->
+      <?end?><!--foreach {services/service/elan/endpoint}-->
     </devices>
   </service-inventory-manager>
 </config-template>

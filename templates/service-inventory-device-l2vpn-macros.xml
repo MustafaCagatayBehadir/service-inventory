@@ -1,8 +1,17 @@
 <config-template xmlns='http://tail-f.com/ns/config/1.0'>
   <!-- XR DEVICE L2VPN MACRO -->
-  <?macro xr-device-l2vpn-elan-macro?>
+  <?macro device-l2vpn-elan-macro?>
     <?foreach {pe-interface}?>
-      <?expand xr-device-interface-parameters-macro?>
+      <interface>
+        <if-size>{if-size}</if-size>
+        <if-number>{if-number}</if-number>
+        <service>
+          <name>l2vpn</name>
+          <elan>
+            <name>{../../name}</name>
+          </elan>
+        </service>        
+      </interface>
     <?end?><!--foreach {pe-interface}-->    
   <?endmacro?>
   <!-- XR DEVICE L2VPN MACRO -->

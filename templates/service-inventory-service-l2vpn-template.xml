@@ -10,9 +10,9 @@
           <?if {platform/name='ios-xr'}?>
             <?expand xr-service-l2vpn-elan-macro?>
           <?elif {platform/name='huawei-vrp'}?><!--if {platform/name='ios-xr'}-->
-            <?expand xr-service-l2vpn-elan-macro?>
-          <?else?>
-            <?expand xr-service-l2vpn-elan-macro?>
+            <?expand vrp-service-l2vpn-elan-macro?>
+          <?else?><!--if {platform/name='ios-xr'}-->
+            <?expand alu-sr-service-l2vpn-elan-macro?>
           <?end?><!--if {platform/name='ios-xr'}-->
         <?end?><!--foreach {/device}-->
       </service>

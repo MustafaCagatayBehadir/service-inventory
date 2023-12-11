@@ -35,19 +35,18 @@
         <mtu>{mtu}</mtu>
         <endpoint>
           <device>{$DEVICE_NAME}</device>
+          <?set i=1?>
+          <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}?>
+            <?expand vrp-service-interface-macro if_size='Ethernet'?>
+            <?set i={$i+1}?>
+          <?end?><!--foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}-->
           <?foreach {pwsignal/ldp/peer}?>
             <neighbor>
               <address>{address}</address>
               <pw-id>{$PW_ID}</pw-id>
               <encapsulation>{encapsulation}</encapsulation>
             </neighbor>
-          <?end?><!--foreach {vfi/neighbor}-->
-          <?foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}?>
-            <?set IF_NAME={concat('Ethernet', name)}?>
-            <pe-interface>
-              <name>{$IF_NAME}</name>
-            </pe-interface>
-          <?end?><!--foreach {config/interface/Ethernet}-->
+          <?end?><!--foreach {pwsignal/ldp/peer}-->
         </endpoint>
       </elan>
     <?end?><!--foreach {config/vsi}-->
@@ -55,7 +54,7 @@
   <!-- VRP L2VPN MACRO -->
 
   <!-- SR L2VPN MACRO -->
-  <?macro sr-service-l2vpn-elan-macro?>
+  <?macro alu-sr-service-l2vpn-elan-macro?>
     <?foreach {config/service/vpls}?>
       <elan>
         <name>{service-id}</name>
@@ -63,8 +62,10 @@
         <endpoint>
           <device>{$DEVICE_NAME}</device>
           <?foreach {sap}?>
+            <?set i=1?>
             <pe-interface>
               <name>{sap-id}</name>
+              <?set i={$i+1}?>
             </pe-interface>
           <?end?><!--foreach {sap}-->
           <?foreach {spoke-sdp}?>

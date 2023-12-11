@@ -1,0 +1,34 @@
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
+  <!-- ALU-SR Interface Encapsulation Macro -->
+  <?macro alu-sr-service-interface-parameters-macro?>
+    <?set IF_ID={name}?>
+    <?set IF_NUMBER={substring-before($IF_ID, ':')}?>
+    <?set IF_ENCAP={substring-after($IF_ID, ':')}?>
+    <?if {contains($IF_ID, '/')}?>
+      <if-size>port</if-size>
+    <?else?><!--if {contains(name, '/')}-->
+      <if-size>lag</if-size>
+    <?end?><!--if {contains(name, '/')}-->
+    <if-number>{$IF_NUMBER}</if-number>
+    <?if {contains($IF_ENCAP, '.')}?>
+      <encapsulation>dot1q-2tags</encapsulation>
+      <s-vlan-id>{substring-before($IF_ENCAP, '.')}</s-vlan-id>
+      <c-vlan-id>{substring-after($IF_ENCAP, '.')}</c-vlan-id>
+    <?elif {$IF_ENCAP}?><!--if {contains($IF_ENCAP, '.')}-->
+      <encapsulation>dot1q</encapsulation>
+      <c-vlan-id>{$IF_ENCAP}</c-vlan-id>    
+    <?else?><!--if {contains($IF_ENCAP, '.')}-->
+      <encapsulation>e-default</encapsulation>
+    <?end?><!--if {contains($IF_ENCAP, '.')}-->
+  <?endmacro?>
+  <!-- ALU-SR Interface Encapsulation Macro -->
+
+  <!-- ALU-SR Service Interface Macro -->
+  <?macro alu-sr-service-interface-macro?>
+    <pe-interface>
+      <id-int>{$i}</id-int>
+      <?expand alu-sr-service-interface-parameters-macro?>
+    </pe-interface>
+  <?endmacro?>
+  <!-- ALU-SR Service Interface Macro -->
+</config-template>

@@ -1,0 +1,29 @@
+<config-template xmlns='http://tail-f.com/ns/config/1.0'>
+  <!-- VRP Interface Encapsulation Macro -->
+  <?macro vrp-service-interface-parameters-macro if_size?>
+    <?set IF_ID={name}?>
+    <?set IF_NUMBER={substring-before($IF_ID, '.')}?>
+    <?set SUBIF_ID={substring-after($IF_ID, '.')}?>
+    <if-size>$if_size</if-size>
+    <if-number>{$IF_NUMBER}</if-number>
+    <subif-id>{$SUBIF_ID}</subif-id>
+    <?if {vlan-type/dot1q}?>
+      <encapsulation>dot1q</encapsulation>
+      <c-vlan-id>{vlan-type/dot1q}</c-vlan-id>
+    <?else?><!--if {expression}-->
+      <encapsulation>dot1q-2tags</encapsulation>
+      <s-vlan-id>{qinq/termination/pe-vid/id}</s-vlan-id>
+      <c-vlan-id>{qinq/termination/pe-vid/ce-vid/id}</c-vlan-id>
+    <?end?><!--if {expression}-->
+  <?endmacro?>
+  <!-- VRP Interface Encapsulation Macro -->
+
+  <!-- VRP Service Interface Macro -->
+  <?macro vrp-service-interface-macro if_size?>
+    <pe-interface>
+      <id-int>{$i}</id-int>
+      <?expand vrp-service-interface-parameters-macro if_size=$if_size?>
+    </pe-interface>
+  <?endmacro?>
+</config-template>
+<!-- VRP Service Interface Macro -->
