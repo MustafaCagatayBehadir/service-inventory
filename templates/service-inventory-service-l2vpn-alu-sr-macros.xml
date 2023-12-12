@@ -1,7 +1,7 @@
 <config-template xmlns='http://tail-f.com/ns/config/1.0'>
   <!-- ALU-SR Interface Encapsulation Macro -->
   <?macro alu-sr-service-interface-parameters-macro?>
-    <?set IF_ID={name}?>
+    <?set IF_ID={sap-id}?>
     <?set IF_NUMBER={substring-before($IF_ID, ':')}?>
     <?set IF_ENCAP={substring-after($IF_ID, ':')}?>
     <?if {contains($IF_ID, '/')}?>

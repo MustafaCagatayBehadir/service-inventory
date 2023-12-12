@@ -61,12 +61,10 @@
         <mtu>{service-mtu}</mtu>
         <endpoint>
           <device>{$DEVICE_NAME}</device>
+          <?set i=1?>
           <?foreach {sap}?>
-            <?set i=1?>
-            <pe-interface>
-              <name>{sap-id}</name>
-              <?set i={$i+1}?>
-            </pe-interface>
+            <?expand alu-sr-service-interface-macro?>
+            <?set i={$i+1}?>
           <?end?><!--foreach {sap}-->
           <?foreach {spoke-sdp}?>
             <?set SDP_ID={sdp-id}?>

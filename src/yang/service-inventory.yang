@@ -182,7 +182,12 @@ module service-inventory {
                 leaf-list c-vlan-id {
                     when "../encapsulation = 'dot1q-2tags' or ../encapsulation = 'dot1ad' or ../encapsulation = 'dot1q'";
                     tailf:info "Interface Encapsulation C-Vlan Id";
-                    type vlan-id-type;
+                    type union {
+                        type vlan-id-type;
+                        type enumeration {
+                            enum "*";
+                        }
+                    }
                 }
             }
 
