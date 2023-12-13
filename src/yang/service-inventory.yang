@@ -264,7 +264,8 @@ module service-inventory {
 
                     leaf name {
                         tailf:info "L2VPN Service Name";
-                        type leafref {
+                        type srvc-inv-string;
+                        tailf:non-strict-leafref {
                             path "/srvc-inv:service-inventory-manager/services/service/elan/name";
                         }
                     }

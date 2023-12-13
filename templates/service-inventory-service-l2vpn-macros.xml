@@ -40,6 +40,10 @@
             <?expand vrp-service-interface-macro if_size='Ethernet'?>
             <?set i={$i+1}?>
           <?end?><!--foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}-->
+          <?foreach {/device[name=$DEVICE_NAME]/config/interface/Eth-Trunk[l2/binding/vsi=$VSI_NAME]}?>
+            <?expand vrp-service-interface-macro if_size='Eth-Trunk'?>
+            <?set i={$i+1}?>
+          <?end?><!--foreach {/device[name=$DEVICE_NAME]/config/interface/Ethernet[l2/binding/vsi=$VSI_NAME]}-->
           <?foreach {pwsignal/ldp/peer}?>
             <neighbor>
               <address>{address}</address>
@@ -57,7 +61,7 @@
   <?macro alu-sr-service-l2vpn-elan-macro?>
     <?foreach {config/service/vpls}?>
       <elan>
-        <name>{service-id}</name>
+        <name>{service-name}</name>
         <mtu>{service-mtu}</mtu>
         <endpoint>
           <device>{$DEVICE_NAME}</device>

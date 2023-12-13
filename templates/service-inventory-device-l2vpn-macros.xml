@@ -9,7 +9,7 @@
           <name>l2vpn</name>
           <elan>
             <name>{../../name}</name>
-          </elan>
+          </elan>            
         </service>        
       </interface>
     <?end?><!--foreach {pe-interface}-->    

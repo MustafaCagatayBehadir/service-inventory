@@ -197,6 +197,7 @@ class OobMigration(ncs.dp.Action):
     ):
         """Migrate l2vpn elan endpoint interface configurations."""
         self.log.info("Function ##" + INDENTATION + inspect.stack()[0][3])
+
         with ncs.maapi.single_write_trans(USER, "system") as trans:
             root = ncs.maagic.get_root(trans)
             l2vpn = root.l2vpn__l2vpn
@@ -238,6 +239,9 @@ class ServiceInventoryCallbacks(Service):
     def cb_create(self, tctx, root, service, proplist):
         """Create method for service."""
         self.log.info("Provisioning service-inventory group ", service.name)
+        template = ncs.template.Template(service)
+        template.apply("service-inventory-service-l2vpn-template")
+        template.apply("service-inventory-device-l2vpn-template")
 
 
 # ---------------------------------------------
