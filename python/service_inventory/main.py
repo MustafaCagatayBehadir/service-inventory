@@ -239,9 +239,6 @@ class ServiceInventoryCallbacks(Service):
     def cb_create(self, tctx, root, service, proplist):
         """Create method for service."""
         self.log.info("Provisioning service-inventory group ", service.name)
-        template = ncs.template.Template(service)
-        template.apply("service-inventory-service-l2vpn-template")
-        template.apply("service-inventory-device-l2vpn-template")
 
 
 # ---------------------------------------------
