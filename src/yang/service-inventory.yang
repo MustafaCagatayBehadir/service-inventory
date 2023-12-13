@@ -86,7 +86,7 @@ module service-inventory {
 
     typedef vlan-id-type {
         type uint16 {
-            range "2..4094";
+            range "0..4094";
         }
         description
           "The VLAN-ID that uniquely identifies a VLAN.  This is the 12-bit
