@@ -61,7 +61,7 @@
   <?macro alu-sr-service-l2vpn-elan-macro?>
     <?foreach {config/service/vpls}?>
       <elan>
-        <name>{service-name}</name>
+        <name>{name}</name>
         <mtu>{service-mtu}</mtu>
         <endpoint>
           <device>{$DEVICE_NAME}</device>
